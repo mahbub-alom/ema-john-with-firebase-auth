@@ -1,49 +1,52 @@
 import React, { useContext, useState } from 'react';
-import './Login.css'
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import './SignUp.css'
+import { Link } from 'react-router-dom';
 import { AuthContext } from '../Providers/AuthProviders';
 
 
-const Login = () => {
+const SignUp = () => {
     const [error, setError] = useState('')
-    const [show, setShow] = useState(false);
 
-    const { signIn } = useContext(AuthContext);
-    const navigate = useNavigate();
-    const location = useLocation();
+    const { createUser } = useContext(AuthContext)
 
-    const from = location.state?.from?.pathname || '/';
-
-    const handleSignIn = (event) => {
+    const handleSignUp = (event) => {
         event.preventDefault()
         const form = event.target;
         const email = form.email.value;
         const password = form.password.value;
-        console.log(email, password);
+        const confirm = form.confirm.value;
+        console.log(email, password, confirm);
 
-        signIn(email, password)
+        setError('')
+        if (!/(?=.*[A-Z])/.test(password, confirm)) {
+            setError('Password should be one uppercase')
+            return;
+        }
+        else if (password !== confirm) {
+            setError("Password doesn't matched!!!")
+            return;
+        }
+        createUser(email, password)
             .then(result => {
                 const loggedUser = result.user;
                 console.log(loggedUser);
-                form.reset();
-                navigate(from, { replace: true })
             })
             .catch(error => {
-                setError(error.message)
                 console.log(error.message);
+                setError(error.message)
             })
-
+        form.reset()
     }
 
     return (
         <div className="hero min-h-screen bg-base-200">
             <div className="hero-content flex-col">
                 <div className="text-center ">
-                    <h1 className="text-5xl font-bold">Login!</h1>
+                    <h1 className="text-5xl font-bold">Sign Up!</h1>
                 </div>
                 <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
                     <div className="card-body">
-                        <form onSubmit={handleSignIn}>
+                        <form onSubmit={handleSignUp}>
                             <small className='text-red-600'>{error}</small>
                             <div className="form-control">
                                 <label className="label">
@@ -55,17 +58,18 @@ const Login = () => {
                                 <label className="label">
                                     <span className="label-text">Password</span>
                                 </label>
-                                <input type={show ? "text" : "password"} name='password' required placeholder="password" className="input input-bordered" />
-                                <p onClick={() => { setShow(!show) }}><small>
-                                    {
-                                        show ? <span>Hide Password</span> : <span>Show Password</span>
-                                    }
-                                </small></p>
+                                <input type="password" name='password' required placeholder="password" className="input input-bordered" />
+                            </div>
+                            <div className="form-control">
+                                <label className="label">
+                                    <span className="label-text">Confirm Password</span>
+                                </label>
+                                <input type="password" name='confirm' required placeholder="confirm password" className="input input-bordered" />
                             </div>
                             <div className="form-control mt-6">
-                                <input className='bg-warning rounded p-2 text-white cursor-help' type="submit" value="Login" />
+                                <input className='bg-warning rounded p-2 text-white cursor-help' type="submit" value="Sign Up" />
                                 <label className="label">
-                                    <p>New to Ema-John? <Link className='text-orange-400 underline' to='/signup'>Create New Account</Link> </p>
+                                    <p>Already have an account? <Link className='text-orange-400 underline' to='/login'>Please Login</Link> </p>
                                 </label>
                             </div>
                         </form>
@@ -76,4 +80,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignUp;
